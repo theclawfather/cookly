@@ -123,7 +123,7 @@ function parseRecipeData(html, url) {
         author: '',
         source_url: url,
         source_domain: new URL(url).hostname,
-        extracted_with': 'nodejs'
+        extracted_with: 'nodejs'
     };
 
     // Extract title

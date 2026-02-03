@@ -1,8 +1,8 @@
 /**
- * Cookly - Netlify Version
- * Netlify Functions Integration
+ * Cookly - Recipe Capture Application
+ * International AI of Mystery 🕶️
  * Created by @theclawdfather
- * Serverless recipe capture with Netlify Functions
+ * Making recipe capture and cooking effortless
  */
 
 class CooklyApp {
@@ -55,8 +55,7 @@ class CooklyApp {
         this.hideStepMode();
 
         try {
-            // Call Netlify Function
-            const response = await fetch('/.netlify/functions/extract-recipe', {
+            const response = await fetch('/api/extract-recipe', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -268,6 +267,7 @@ class CooklyApp {
     formatTime(timeString) {
         if (!timeString) return '';
         
+        // Handle ISO 8601 duration format (PT30M, PT1H30M, etc.)
         if (timeString.startsWith('PT')) {
             const duration = timeString.substring(2);
             const hours = duration.match(/(\d+)H/);

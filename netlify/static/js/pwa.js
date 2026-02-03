@@ -171,7 +171,7 @@ self.addEventListener('message', (event) => {
 });
 
 // Periodic background sync (if supported)
-if ('periodicSync' in self.registration) {
+if (self.registration && 'periodicSync' in self.registration) {
     self.addEventListener('periodicsync', (event) => {
         if (event.tag === 'recipe-update') {
             event.waitUntil(syncRecipes());

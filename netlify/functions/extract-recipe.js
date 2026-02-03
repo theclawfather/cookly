@@ -3,6 +3,8 @@
 // Created by @theclawdfather
 
 const cheerio = require('cheerio');
+const https = require('https');
+const http = require('http');
 const { URL } = require('url');
 
 exports.handler = async (event, context) => {
@@ -66,92 +68,113 @@ exports.handler = async (event, context) => {
 
 async function extractRecipe(url) {
     try {
-        const headers = {
-            'User-Agent': 'Cookly Recipe Extractor 1.0'
+        const parsedUrl = new URL(url);
+        const isHttps = parsedUrl.protocol === 'https:';
+        const client = isHttps ? https : http;
+
+        const options = {
+            headers: {
+                'User-Agent': 'Cookly Recipe Extractor 1.0'
+            },
+            timeout: 10000
         };
 
-        const response = await fetch(url, { 
-            headers, 
-            timeout: 10000 
+        return new Promise((resolve, reject) => {
+            const req = client.get(parsedUrl, options, (res) => {
+                if (res.statusCode !== 200) {
+                    reject(new Error(`HTTP error! status: ${res.statusCode}`));
+                    return;
+                }
+
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    try {
+                        const recipeData = parseRecipeData(data, url);
+                        resolve(recipeData);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            });
+
+            req.on('error', reject);
+            req.on('timeout', () => reject(new Error('Request timeout')));
         });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const html = await response.text();
-        const $ = cheerio.load(html);
-
-        const recipeData = {
-            title: '',
-            description: '',
-            ingredients: [],
-            instructions: [],
-            prep_time: '',
-            cook_time: '',
-            total_time: '',
-            servings: '',
-            image: '',
-            author: '',
-            source_url: url,
-            source_domain: new URL(url).hostname,
-            extracted_with: 'nodejs'
-        };
-
-        // Extract title
-        const titleTag = $('h1').first() || $('title');
-        if (titleTag.length) {
-            recipeData.title = titleTag.text().trim();
-        }
-
-        // Extract main image
-        const imageTag = $('meta[property="og:image"]').first() || $('meta[name="twitter:image"]').first();
-        if (imageTag.length) {
-            recipeData.image = imageTag.attr('content') || '';
-        }
-
-        // Extract ingredients
-        const ingredientSelectors = [
-            '.ingredients', '.recipe-ingredients', '[class*="ingredient"]',
-            'ul.ingredients', 'ol.ingredients', '.ingredient-list'
-        ];
-
-        for (const selector of ingredientSelectors) {
-            const ingredientsList = $(selector);
-            if (ingredientsList.length) {
-                ingredientsList.find('li').each((i, elem) => {
-                    const ingredientText = $(elem).text().trim();
-                    if (ingredientText) {
-                        recipeData.ingredients.push(ingredientText);
-                    }
-                });
-                break;
-            }
-        }
-
-        // Extract instructions
-        const instructionSelectors = [
-            '.instructions', '.recipe-instructions', '.directions',
-            '[class*="instruction"]', '[class*="step"]'
-        ];
-
-        for (const selector of instructionSelectors) {
-            const instructionsSection = $(selector);
-            if (instructionsSection.length) {
-                instructionsSection.find('li, p').each((i, elem) => {
-                    const stepText = $(elem).text().trim();
-                    if (stepText && stepText.length > 10) {
-                        recipeData.instructions.push(stepText);
-                    }
-                });
-                break;
-            }
-        }
-
-        return recipeData;
 
     } catch (error) {
-        console.error('Error extracting recipe:', error);
         return { error: error.message, source_url: url };
     }
+}
+
+function parseRecipeData(html, url) {
+    const $ = cheerio.load(html);
+    
+    const recipeData = {
+        title: '',
+        description: '',
+        ingredients: [],
+        instructions: [],
+        prep_time: '',
+        cook_time: '',
+        total_time: '',
+        servings: '',
+        image: '',
+        author: '',
+        source_url: url,
+        source_domain: new URL(url).hostname,
+        extracted_with': 'nodejs'
+    };
+
+    // Extract title
+    const titleTag = $('h1').first() || $('title');
+    if (titleTag.length) {
+        recipeData.title = titleTag.text().trim();
+    }
+
+    // Extract main image
+    const imageTag = $('meta[property="og:image"]').first() || $('meta[name="twitter:image"]').first();
+    if (imageTag.length) {
+        recipeData.image = imageTag.attr('content') || '';
+    }
+
+    // Extract ingredients
+    const ingredientSelectors = [
+        '.ingredients', '.recipe-ingredients', '[class*="ingredient"]',
+        'ul.ingredients', 'ol.ingredients', '.ingredient-list'
+    ];
+
+    for (const selector of ingredientSelectors) {
+        const ingredientsList = $(selector);
+        if (ingredientsList.length) {
+            ingredientsList.find('li').each((i, elem) => {
+                const ingredientText = $(elem).text().trim();
+                if (ingredientText) {
+                    recipeData.ingredients.push(ingredientText);
+                }
+            });
+            break;
+        }
+    }
+
+    // Extract instructions
+    const instructionSelectors = [
+        '.instructions', '.recipe-instructions', '.directions',
+        '[class*="instruction"]', '[class*="step"]'
+    ];
+
+    for (const selector of instructionSelectors) {
+        const instructionsSection = $(selector);
+        if (instructionsSection.length) {
+            instructionsSection.find('li, p').each((i, elem) => {
+                const stepText = $(elem).text().trim();
+                if (stepText && stepText.length > 10) {
+                    recipeData.instructions.push(stepText);
+                }
+            });
+            break;
+        }
+    }
+
+    return recipeData;
 }

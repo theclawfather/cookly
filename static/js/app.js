@@ -395,6 +395,8 @@ class CooklyApp {
             this.shareRecipe();
         }
     }
+
+    isValidEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 

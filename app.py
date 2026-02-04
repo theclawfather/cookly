@@ -33,6 +33,21 @@ class RecipeExtractor:
     def extract_recipe(self, url):
         """Extract recipe data from URL"""
         try:
+            # Check if this is a Cookly import URL
+            parsed = urlparse(url)
+            if 'import=' in url:
+                from urllib.parse import parse_qs
+                query_params = parse_qs(parsed.query)
+                if 'import' in query_params:
+                    import base64
+                    encoded_data = query_params['import'][0]
+                    recipe_data = json.loads(base64.b64decode(encoded_data).decode('utf-8'))
+                    recipe_data['source_url'] = url
+                    recipe_data['source_domain'] = 'cookly-shared'
+                    recipe_data['imported_from'] = 'cookly'
+                    return recipe_data
+            
+            # Regular HTTP extraction
             response = requests.get(url, headers=self.headers, timeout=10)
             response.raise_for_status()
             

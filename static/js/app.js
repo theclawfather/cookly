@@ -145,26 +145,34 @@ class CooklyApp {
         // Ingredients
         const ingList = document.getElementById('ingredients-list');
         ingList.innerHTML = '';
-        recipeData.ingredients.forEach(ing => {
-            const li = document.createElement('li');
-            li.textContent = ing;
-            ingList.appendChild(li);
-        });
+        if (recipeData.ingredients && Array.isArray(recipeData.ingredients)) {
+            recipeData.ingredients.forEach(ing => {
+                const li = document.createElement('li');
+                li.textContent = ing;
+                ingList.appendChild(li);
+            });
+        }
         
         // Instructions
         const instList = document.getElementById('instructions-list');
         instList.innerHTML = '';
-        recipeData.instructions.forEach((inst, i) => {
-            const li = document.createElement('li');
-            li.textContent = inst;
-            instList.appendChild(li);
-        });
+        if (recipeData.instructions && Array.isArray(recipeData.instructions)) {
+            recipeData.instructions.forEach((inst, i) => {
+                const li = document.createElement('li');
+                li.textContent = inst;
+                instList.appendChild(li);
+            });
+        }
         
         this.totalSteps = recipeData.instructions.length;
     }
 
     saveRecipe() {
-        if (!this.currentRecipe) return;
+        console.log('Save button clicked, currentRecipe:', this.currentRecipe);
+        if (!this.currentRecipe) {
+            console.log('No current recipe to save');
+            return;
+        }
         
         const recipeToSave = {
             ...this.currentRecipe,
@@ -172,10 +180,12 @@ class CooklyApp {
             saved_at: new Date().toISOString()
         };
         
+        console.log('Saving recipe:', recipeToSave);
         this.savedRecipes.push(recipeToSave);
         this.saveToStorage();
         this.displaySavedRecipes();
         this.showStatus('Recipe saved!', 'success');
+        console.log('Recipe saved successfully');
     }
 
     displaySavedRecipes() {
@@ -190,13 +200,16 @@ class CooklyApp {
         this.savedRecipes.forEach(recipe => {
             const card = document.createElement('div');
             card.className = 'recipe-card';
+            const ingredientCount = recipe.ingredients && Array.isArray(recipe.ingredients) 
+                ? recipe.ingredients.length 
+                : 0;
             card.innerHTML = `
                 <div class="recipe-card-header">
                     <h4>${recipe.title || 'Untitled'}</h4>
                 </div>
                 <div class="recipe-card-meta">
                     <span>${new Date(recipe.saved_at).toLocaleDateString()}</span>
-                    <span>${recipe.ingredients.length} ingredients</span>
+                    <span>${ingredientCount} ingredients</span>
                 </div>
                 <div class="recipe-card-actions">
                     <button onclick="app.loadSavedRecipe(${recipe.id})" class="view-recipe-btn">View</button>

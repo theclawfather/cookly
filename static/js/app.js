@@ -62,65 +62,106 @@ class CooklyApp {
     }
 
     initializeEventListeners() {
+        console.log('Initializing event listeners...');
+        
         // Capture button
         const captureBtn = document.getElementById('capture-btn');
         const recipeUrl = document.getElementById('recipe-url');
         
-        captureBtn.addEventListener('click', () => this.captureRecipe());
-        recipeUrl.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.captureRecipe();
-        });
+        if (captureBtn) {
+            captureBtn.addEventListener('click', () => this.captureRecipe());
+            console.log('✓ Capture button listener attached');
+        } else {
+            console.error('✗ capture-btn not found');
+        }
+        
+        if (recipeUrl) {
+            recipeUrl.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.captureRecipe();
+            });
+        }
 
-        // Recipe actions
-        document.getElementById('save-recipe')?.addEventListener('click', () => this.showSaveDialog());
-        document.getElementById('step-by-step')?.addEventListener('click', () => this.startStepByStep());
-        document.getElementById('share-recipe')?.addEventListener('click', () => this.shareRecipe());
+        // Recipe actions - check if elements exist before attaching
+        const saveRecipeBtn = document.getElementById('save-recipe');
+        const stepByStepBtn = document.getElementById('step-by-step');
+        const shareRecipeBtn = document.getElementById('share-recipe');
+        
+        if (saveRecipeBtn) saveRecipeBtn.addEventListener('click', () => this.showSaveDialog());
+        if (stepByStepBtn) stepByStepBtn.addEventListener('click', () => this.startStepByStep());
+        if (shareRecipeBtn) shareRecipeBtn.addEventListener('click', () => this.shareRecipe());
 
         // Step navigation
-        document.getElementById('prev-step')?.addEventListener('click', () => this.previousStep());
-        document.getElementById('next-step')?.addEventListener('click', () => this.nextStep());
-        document.getElementById('exit-step-mode')?.addEventListener('click', () => this.exitStepMode());
+        const prevStepBtn = document.getElementById('prev-step');
+        const nextStepBtn = document.getElementById('next-step');
+        const exitStepBtn = document.getElementById('exit-step-mode');
+        
+        if (prevStepBtn) prevStepBtn.addEventListener('click', () => this.previousStep());
+        if (nextStepBtn) nextStepBtn.addEventListener('click', () => this.nextStep());
+        if (exitStepBtn) exitStepBtn.addEventListener('click', () => this.exitStepMode());
 
         // Category filter
-        document.getElementById('category-filter')?.addEventListener('change', (e) => {
-            this.currentFilter = e.target.value;
-            this.displaySavedRecipes();
-        });
+        const categoryFilter = document.getElementById('category-filter');
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', (e) => {
+                this.currentFilter = e.target.value;
+                this.displaySavedRecipes();
+            });
+        }
 
         // Search functionality
         const searchInput = document.getElementById('recipe-search');
         const clearSearchBtn = document.getElementById('clear-search');
         
-        searchInput?.addEventListener('input', (e) => {
-            this.searchQuery = e.target.value.trim().toLowerCase();
-            clearSearchBtn.style.display = this.searchQuery ? 'inline-block' : 'none';
-            this.displaySavedRecipes();
-        });
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.searchQuery = e.target.value.trim().toLowerCase();
+                if (clearSearchBtn) clearSearchBtn.style.display = this.searchQuery ? 'inline-block' : 'none';
+                this.displaySavedRecipes();
+            });
+        }
         
-        clearSearchBtn?.addEventListener('click', () => {
-            searchInput.value = '';
-            this.searchQuery = '';
-            clearSearchBtn.style.display = 'none';
-            this.displaySavedRecipes();
-        });
+        if (clearSearchBtn) {
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                this.searchQuery = '';
+                clearSearchBtn.style.display = 'none';
+                this.displaySavedRecipes();
+            });
+        }
 
         // Save dialog
-        document.getElementById('confirm-save')?.addEventListener('click', () => this.confirmSave());
-        document.getElementById('cancel-save')?.addEventListener('click', () => this.hideSaveDialog());
-        document.getElementById('new-category-btn')?.addEventListener('click', () => this.addNewCategory());
-        document.getElementById('update-household-btn')?.addEventListener('click', () => this.updateHouseholdId());
-        document.getElementById('sync-header-toggle')?.addEventListener('click', () => this.toggleSyncSettings());
+        const confirmSaveBtn = document.getElementById('confirm-save');
+        const cancelSaveBtn = document.getElementById('cancel-save');
+        const newCategoryBtn = document.getElementById('new-category-btn');
+        const updateHouseholdBtn = document.getElementById('update-household-btn');
+        const syncHeaderToggle = document.getElementById('sync-header-toggle');
+        
+        if (confirmSaveBtn) confirmSaveBtn.addEventListener('click', () => this.confirmSave());
+        if (cancelSaveBtn) cancelSaveBtn.addEventListener('click', () => this.hideSaveDialog());
+        if (newCategoryBtn) newCategoryBtn.addEventListener('click', () => this.addNewCategory());
+        if (updateHouseholdBtn) updateHouseholdBtn.addEventListener('click', () => this.updateHouseholdId());
+        if (syncHeaderToggle) syncHeaderToggle.addEventListener('click', () => this.toggleSyncSettings());
 
-        // Share dialog tabs
+        // Share dialog
         document.querySelectorAll('.share-tab').forEach(tab => {
             tab.addEventListener('click', (e) => this.switchShareTab(e.target.dataset.tab));
         });
-        document.getElementById('copy-text')?.addEventListener('click', () => this.copyShareText());
-        document.getElementById('copy-json')?.addEventListener('click', () => this.copyShareJson());
-        document.getElementById('copy-cookly-url')?.addEventListener('click', () => this.copyCooklyUrl());
-        document.getElementById('close-share')?.addEventListener('click', () => this.hideShareDialog());
-        document.getElementById('send-email-action')?.addEventListener('click', () => this.sendEmailShare());
-        document.getElementById('send-email-btn')?.addEventListener('click', () => this.sendEmailShare());
+        
+        const copyTextBtn = document.getElementById('copy-text');
+        const copyJsonBtn = document.getElementById('copy-json');
+        const copyCooklyUrlBtn = document.getElementById('copy-cookly-url');
+        const closeShareBtn = document.getElementById('close-share');
+        const sendEmailActionBtn = document.getElementById('send-email-action');
+        const sendEmailBtn = document.getElementById('send-email-btn');
+        
+        if (copyTextBtn) copyTextBtn.addEventListener('click', () => this.copyShareText());
+        if (copyJsonBtn) copyJsonBtn.addEventListener('click', () => this.copyShareJson());
+        if (copyCooklyUrlBtn) copyCooklyUrlBtn.addEventListener('click', () => this.copyCooklyUrl());
+        if (closeShareBtn) closeShareBtn.addEventListener('click', () => this.hideShareDialog());
+        if (sendEmailActionBtn) sendEmailActionBtn.addEventListener('click', () => this.sendEmailShare());
+        if (sendEmailBtn) sendEmailBtn.addEventListener('click', () => this.sendEmailShare());
+        
+        console.log('✓ All event listeners initialized');
     }
 
     initializeCategories() {

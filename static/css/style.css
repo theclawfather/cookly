@@ -1026,6 +1026,35 @@ body {
     color: var(--background-dark);
 }
 
+/* Share Email Content */
+.share-email-content {
+    padding: 20px;
+    background: var(--background-dark);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: var(--border-radius);
+}
+
+.share-email-content p {
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.email-input {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--background-medium);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+.email-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
 /* Mobile Adjustments */
 @media (max-width: 600px) {
     .recipe-title-row {

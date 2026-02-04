@@ -160,16 +160,23 @@
                     <h3>Share Recipe</h3>
                     <div class="share-tabs">
                         <button class="share-tab active" data-tab="text">Text</button>
+                        <button class="share-tab" data-tab="email">Email</button>
                         <button class="share-tab" data-tab="json">JSON</button>
                     </div>
                     <div class="share-content">
                         <textarea id="share-text" class="share-textarea" readonly></textarea>
+                        <div id="share-email" class="share-email-content" style="display: none;">
+                            <p>Send this recipe via email:</p>
+                            <input type="email" id="share-email-address" placeholder="recipient@example.com" class="email-input">
+                            <button id="send-email-btn" class="btn-primary">Send Email</button>
+                        </div>
                         <textarea id="share-json" class="share-textarea" readonly style="display: none;"></textarea>
                     </div>
                     <div class="dialog-actions">
                         <button id="copy-text" class="btn-primary">Copy Text</button>
                         <button id="copy-json" class="btn-primary" style="display: none;">Copy JSON</button>
-                        <button id="close-share" class="btn-secondary">Close</button>
+                        <button id="send-email-action" class="btn-primary" style="display: none;">Open Email App</button>
+                        <button id="close-share" class="btn-secondary" onclick="app.hideShareDialog()">Close</button>
                     </div>
                 </div>
             </div>

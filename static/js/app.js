@@ -56,6 +56,9 @@ class CooklyApp {
         });
         document.getElementById('copy-text')?.addEventListener('click', () => this.copyShareText());
         document.getElementById('copy-json')?.addEventListener('click', () => this.copyShareJson());
+        document.getElementById('close-share')?.addEventListener('click', () => this.hideShareDialog());
+        document.getElementById('send-email-action')?.addEventListener('click', () => this.sendEmailShare());
+        document.getElementById('send-email-btn')?.addEventListener('click', () => this.sendEmailShare());
     }
 
     initializeCategories() {
@@ -283,11 +286,33 @@ class CooklyApp {
         
         // Update content
         document.getElementById('share-text').style.display = tab === 'text' ? 'block' : 'none';
+        document.getElementById('share-email').style.display = tab === 'email' ? 'block' : 'none';
         document.getElementById('share-json').style.display = tab === 'json' ? 'block' : 'none';
         
         // Update buttons
         document.getElementById('copy-text').style.display = tab === 'text' ? 'inline-block' : 'none';
         document.getElementById('copy-json').style.display = tab === 'json' ? 'inline-block' : 'none';
+        document.getElementById('send-email-action').style.display = tab === 'email' ? 'inline-block' : 'none';
+    }
+
+    sendEmailShare() {
+        const email = document.getElementById('share-email-address').value;
+        if (!email || !this.isValidEmail(email)) {
+            this.showStatus('Please enter a valid email address', 'error');
+            return;
+        }
+        
+        const subject = encodeURIComponent(`Recipe: ${this.currentRecipe.title || 'Shared Recipe'}`);
+        const body = encodeURIComponent(this.generateShareText());
+        
+        // Open mailto link
+        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        
+        this.showStatus('Email client opened!', 'success');
+    }
+
+    isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
     generateShareText() {

@@ -18,7 +18,11 @@ class CooklyApp {
         
         this.initializeEventListeners();
         this.initializeCategories();
-        this.initFirebase();
+        
+        // Initialize Firebase but don't block on it
+        this.initFirebase().catch(err => {
+            console.error('Firebase initialization failed:', err);
+        });
     }
 
     async initFirebase() {

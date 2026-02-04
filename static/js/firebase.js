@@ -29,22 +29,27 @@ class CooklyFirebase {
     }
 
     async init() {
-        // Firebase config from your project
-        const firebaseConfig = {
-            apiKey: "AIzaSyBrHikdnB62dV5qQvOWabPnfdA4ipPUr-A",
-            authDomain: "cookly-shared.firebaseapp.com",
-            projectId: "cookly-shared",
-            storageBucket: "cookly-shared.firebasestorage.app",
-            messagingSenderId: "253302721623",
-            appId: "1:253302721623:web:3252fe1e5f66a2a4b5a712"
-        };
+        try {
+            // Firebase config from your project
+            const firebaseConfig = {
+                apiKey: "AIzaSyBrHikdnB62dV5qQvOWabPnfdA4ipPUr-A",
+                authDomain: "cookly-shared.firebaseapp.com",
+                projectId: "cookly-shared",
+                storageBucket: "cookly-shared.firebasestorage.app",
+                messagingSenderId: "253302721623",
+                appId: "1:253302721623:web:3252fe1e5f66a2a4b5a712"
+            };
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        this.db = firebase.firestore(app);
-        
-        console.log('Firebase initialized for household:', this.householdId);
-        return true;
+            // Initialize Firebase
+            const app = firebase.initializeApp(firebaseConfig);
+            this.db = firebase.firestore(app);
+            
+            console.log('Firebase initialized for household:', this.householdId);
+            return true;
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            return false;
+        }
     }
 
     // Save recipe to shared collection

@@ -56,6 +56,7 @@ class CooklyApp {
         });
         document.getElementById('copy-text')?.addEventListener('click', () => this.copyShareText());
         document.getElementById('copy-json')?.addEventListener('click', () => this.copyShareJson());
+        document.getElementById('copy-cookly-url')?.addEventListener('click', () => this.copyCooklyUrl());
         document.getElementById('close-share')?.addEventListener('click', () => this.hideShareDialog());
         document.getElementById('send-email-action')?.addEventListener('click', () => this.sendEmailShare());
         document.getElementById('send-email-btn')?.addEventListener('click', () => this.sendEmailShare());
@@ -268,10 +269,54 @@ class CooklyApp {
         
         const shareText = this.generateShareText();
         const shareJson = JSON.stringify(this.currentRecipe, null, 2);
+        const cooklyUrl = this.generateCooklyUrl();
         
         document.getElementById('share-text').value = shareText;
         document.getElementById('share-json').value = shareJson;
+        document.getElementById('cookly-url').value = cooklyUrl;
         document.getElementById('share-dialog').style.display = 'block';
+        
+        // Reset to text tab
+        this.switchShareTab('text');
+    }
+
+    generateCooklyUrl() {
+        // Create a Cookly share URL with base64-encoded recipe data
+        const recipeData = btoa(JSON.stringify(this.currentRecipe));
+        const baseUrl = window.location.origin + window.location.pathname;
+        return `${baseUrl}?import=${encodeURIComponent(recipeData)}`;
+    }
+
+    async copyCooklyUrl() {
+        const url = document.getElementById('cookly-url').value;
+        try {
+            await navigator.clipboard.writeText(url);
+            this.showStatus('Cookly URL copied! Share it with other Cookly users.', 'success');
+        } catch (err) {
+            this.showStatus('Failed to copy. Please select and copy manually.', 'error');
+        }
+    }
+
+    checkForImportedRecipe() {
+        // Check URL params for imported recipe
+        const urlParams = new URLSearchParams(window.location.search);
+        const importData = urlParams.get('import');
+        
+        if (importData) {
+            try {
+                const recipeData = JSON.parse(atob(decodeURIComponent(importData)));
+                this.currentRecipe = recipeData;
+                this.displayRecipe(recipeData);
+                this.showRecipeDisplay();
+                this.showStatus('Recipe imported successfully! Click "Save Recipe" to keep it.', 'success');
+                
+                // Clear the URL parameter without reloading
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (err) {
+                console.error('Failed to import recipe:', err);
+                this.showStatus('Failed to import recipe. Invalid URL.', 'error');
+            }
+        }
     }
 
     hideShareDialog() {
@@ -287,10 +332,12 @@ class CooklyApp {
         // Update content
         document.getElementById('share-text').style.display = tab === 'text' ? 'block' : 'none';
         document.getElementById('share-email').style.display = tab === 'email' ? 'block' : 'none';
+        document.getElementById('share-cookly').style.display = tab === 'cookly' ? 'block' : 'none';
         document.getElementById('share-json').style.display = tab === 'json' ? 'block' : 'none';
         
         // Update buttons
         document.getElementById('copy-text').style.display = tab === 'text' ? 'inline-block' : 'none';
+        document.getElementById('copy-cookly-url').style.display = tab === 'cookly' ? 'inline-block' : 'none';
         document.getElementById('copy-json').style.display = tab === 'json' ? 'inline-block' : 'none';
         document.getElementById('send-email-action').style.display = tab === 'email' ? 'inline-block' : 'none';
     }
@@ -583,4 +630,5 @@ class CooklyApp {
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new CooklyApp();
+    window.app.checkForImportedRecipe();
 });

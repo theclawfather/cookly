@@ -98,7 +98,11 @@ class CooklyApp {
             copyText.addEventListener('click', () => this.copyShareText());
         }
         
-        console.log('Event listeners attached');
+        // Share from saved recipe
+        const shareSavedBtn = document.getElementById('share-saved-btn');
+        if (shareSavedBtn) {
+            shareSavedBtn.addEventListener('click', () => this.shareSavedRecipe());
+        }
     }
 
     async captureRecipe() {
@@ -229,11 +233,20 @@ class CooklyApp {
                 </div>
                 <div class="recipe-card-actions">
                     <button onclick="app.loadSavedRecipe(${recipe.id})" class="view-recipe-btn">View</button>
+                    <button onclick="app.shareRecipeById(${recipe.id})" class="share-saved-btn">Share</button>
                     <button onclick="app.deleteRecipe(${recipe.id})" class="delete-recipe-btn">Delete</button>
                 </div>
             `;
             container.appendChild(card);
         });
+    }
+
+    shareRecipeById(id) {
+        const recipe = this.savedRecipes.find(r => r.id === id);
+        if (recipe) {
+            this.currentRecipe = recipe;
+            this.shareRecipe();
+        }
     }
 
     loadSavedRecipe(id) {
@@ -372,7 +385,16 @@ class CooklyApp {
         this.showStatus('Email client opened!', 'success');
     }
 
-    isValidEmail(email) {
+    shareSavedRecipe() {
+        // Get the most recently viewed/clicked recipe, or use current
+        if (!this.currentRecipe && this.savedRecipes.length > 0) {
+            // Share the first saved recipe as default
+            this.currentRecipe = this.savedRecipes[0];
+        }
+        if (this.currentRecipe) {
+            this.shareRecipe();
+        }
+    }
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 

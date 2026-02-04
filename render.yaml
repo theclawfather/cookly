@@ -1,4 +1,11 @@
-web: python app.py
-
-# Or specify the exact command
-# web: gunicorn app:app --bind 0.0.0.0:$PORT
+services:
+  - type: web
+    name: cookly
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FLASK_ENV
+        value: production

@@ -21,16 +21,38 @@ class CooklyApp {
     }
 
     async initFirebase() {
-        // Initialize Firebase
+        // First load from localStorage for immediate display
+        this.savedRecipes = this.loadSavedRecipes();
+        this.displaySavedRecipes();
+        
+        // Then initialize Firebase for syncing
         if (window.cooklyFirebase) {
-            await window.cooklyFirebase.init();
-            
-            // Listen for real-time updates
-            window.cooklyFirebase.onRecipesChanged((recipes) => {
-                this.savedRecipes = recipes;
-                this.saveRecipesToStorage(); // Cache locally
-                this.displaySavedRecipes();
-            });
+            try {
+                await window.cooklyFirebase.init();
+                
+                // Listen for real-time updates from Firebase
+                window.cooklyFirebase.onRecipesChanged((firebaseRecipes) => {
+                    if (firebaseRecipes.length > 0) {
+                        // Merge Firebase recipes with local (Firebase wins on conflict)
+                        const localIds = new Set(this.savedRecipes.map(r => r.id));
+                        const newRecipes = firebaseRecipes.filter(r => !localIds.has(r.id));
+                        this.savedRecipes = [...this.savedRecipes, ...newRecipes];
+                        
+                        // Sort by saved date
+                        this.savedRecipes.sort((a, b) => new Date(b.saved_at) - new Date(a.saved_at));
+                        
+                        this.saveRecipesToStorage();
+                        this.displaySavedRecipes();
+                    }
+                });
+                
+                // Sync local recipes TO Firebase if they're not there yet
+                this.savedRecipes.forEach(recipe => {
+                    window.cooklyFirebase.saveRecipe(recipe);
+                });
+            } catch (error) {
+                console.error('Firebase init failed:', error);
+            }
         }
     }
 

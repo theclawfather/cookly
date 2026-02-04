@@ -206,13 +206,20 @@
             <section class="saved-recipes">
                 <div class="saved-recipes-header">
                     <h3 class="section-title">Saved Recipes</h3>
-                    <div class="filter-group">
-                        <label for="category-filter">Filter:</label>
-                        <select id="category-filter" class="category-filter">
-                            <option value="all">All Categories</option>
-                        </select>
+                    <div class="header-controls">
+                        <div class="search-group">
+                            <input type="text" id="recipe-search" placeholder="🔍 Search recipes..." class="search-input">
+                            <button id="clear-search" class="clear-search-btn" style="display: none;">✕</button>
+                        </div>
+                        <div class="filter-group">
+                            <label for="category-filter">Filter:</label>
+                            <select id="category-filter" class="category-filter">
+                                <option value="all">All Categories</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
+                <div id="search-results-info" class="search-results-info" style="display: none;"></div>
                 <div id="saved-recipes-list" class="saved-recipes-list">
                     <p class="no-recipes">No saved recipes yet. Capture your first recipe above!</p>
                 </div>

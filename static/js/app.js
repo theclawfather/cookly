@@ -11,6 +11,7 @@ class CooklyApp {
         this.savedRecipes = [];
         this.categories = this.loadCategories();
         this.currentFilter = 'all';
+        this.searchQuery = '';
         this.currentStep = 0;
         this.totalSteps = 0;
         this.firebaseSync = true; // Enable Firebase syncing
@@ -79,6 +80,23 @@ class CooklyApp {
         // Category filter
         document.getElementById('category-filter')?.addEventListener('change', (e) => {
             this.currentFilter = e.target.value;
+            this.displaySavedRecipes();
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('recipe-search');
+        const clearSearchBtn = document.getElementById('clear-search');
+        
+        searchInput?.addEventListener('input', (e) => {
+            this.searchQuery = e.target.value.trim().toLowerCase();
+            clearSearchBtn.style.display = this.searchQuery ? 'inline-block' : 'none';
+            this.displaySavedRecipes();
+        });
+        
+        clearSearchBtn?.addEventListener('click', () => {
+            searchInput.value = '';
+            this.searchQuery = '';
+            clearSearchBtn.style.display = 'none';
             this.displaySavedRecipes();
         });
 
@@ -531,19 +549,47 @@ class CooklyApp {
 
     displaySavedRecipes() {
         const container = document.getElementById('saved-recipes-list');
+        const searchInfo = document.getElementById('search-results-info');
         
         // Filter recipes
         let recipesToShow = this.savedRecipes;
+        
+        // Category filter
         if (this.currentFilter !== 'all') {
-            recipesToShow = this.savedRecipes.filter(r => r.category === this.currentFilter);
+            recipesToShow = recipesToShow.filter(r => r.category === this.currentFilter);
+        }
+        
+        // Search filter
+        if (this.searchQuery) {
+            recipesToShow = recipesToShow.filter(r => {
+                const titleMatch = r.title && r.title.toLowerCase().includes(this.searchQuery);
+                const ingredientMatch = r.ingredients && r.ingredients.some(ing => 
+                    ing.toLowerCase().includes(this.searchQuery)
+                );
+                return titleMatch || ingredientMatch;
+            });
+            
+            // Show search results info
+            if (searchInfo) {
+                searchInfo.style.display = 'block';
+                searchInfo.textContent = `Found ${recipesToShow.length} recipe${recipesToShow.length !== 1 ? 's' : ''} for "${this.searchQuery}"`;
+            }
+        } else {
+            if (searchInfo) searchInfo.style.display = 'none';
         }
         
         if (recipesToShow.length === 0) {
-            const message = this.currentFilter === 'all' 
-                ? 'No saved recipes yet. Capture your first recipe above!'
-                : `No recipes in category "${this.currentFilter}"`;
+            let message;
+            if (this.searchQuery) {
+                message = `No recipes found for "${this.searchQuery}"`;
+            } else if (this.currentFilter !== 'all') {
+                message = `No recipes in category "${this.currentFilter}"`;
+            } else {
+                message = 'No saved recipes yet. Capture your first recipe above!';
+            }
             container.innerHTML = `<p class="no-recipes">${message}</p>`;
             return;
+        }
         }
         
         container.innerHTML = '';

@@ -10,7 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 import logging
 import os
 import html.parser

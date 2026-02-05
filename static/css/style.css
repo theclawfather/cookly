@@ -910,6 +910,257 @@ body {
         width: 100%;
     }
 }
+
+/* Shopping List Section */
+.shopping-list-section {
+    background: var(--background-card);
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    margin-bottom: 24px;
+}
+
+.shopping-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.shopping-list-header .section-title {
+    margin: 0;
+}
+
+.toggle-btn {
+    padding: 8px 16px;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-light);
+    color: white;
+}
+
+.shopping-list-content {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.shopping-list-empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-muted);
+}
+
+.shopping-list-empty .hint {
+    font-size: 0.85rem;
+    margin-top: 8px;
+}
+
+.shopping-list-items {
+    list-style: none;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.shopping-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--background);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.shopping-list-item:hover {
+    border-color: var(--border-color);
+}
+
+.shopping-list-item.purchased {
+    opacity: 0.6;
+    background: var(--background-hover);
+}
+
+.shopping-list-item.purchased .item-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.item-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.item-text {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.item-recipe-tag {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    background: var(--primary-light);
+    color: white;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.remove-item-btn {
+    padding: 4px 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+}
+
+.remove-item-btn:hover {
+    color: var(--error-color);
+    opacity: 1;
+}
+
+.shopping-list-actions {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.add-item-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.add-item-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.add-item-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.add-item-btn {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-item-btn:hover {
+    background: var(--primary-dark);
+}
+
+.list-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 8px 14px;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: var(--background-hover);
+    border-color: var(--primary-color);
+}
+
+.action-btn.danger:hover {
+    background: var(--error-color);
+    border-color: var(--error-color);
+    color: white;
+}
+
+/* Add to Shopping List button on recipe cards */
+.add-to-list-btn {
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-to-list-btn:hover {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+/* Recipe display add to shopping list button */
+.add-to-shopping-btn {
+    padding: 12px 20px;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-to-shopping-btn:hover {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+/* Mobile adjustments for shopping list */
+@media (max-width: 600px) {
+    .shopping-list-item {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .item-text {
+        flex: 1 1 calc(100% - 40px);
+    }
+    
+    .item-recipe-tag {
+        margin-left: 32px;
+    }
+}
     .app-container {
         padding: 16px;
     }

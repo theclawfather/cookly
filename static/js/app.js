@@ -6,6 +6,8 @@ class CooklyApp {
     constructor() {
         this.currentRecipe = null;
         this.savedRecipes = this.loadSavedRecipes();
+        this.shoppingList = this.loadShoppingList();
+        this.shoppingListVisible = false;
         this.currentFilter = 'all';
         this.searchQuery = '';
         
@@ -15,6 +17,7 @@ class CooklyApp {
     init() {
         console.log('Initializing Cookly...');
         this.displaySavedRecipes();
+        this.displayShoppingList();
         this.attachListeners();
         console.log('Cookly initialized!');
     }
@@ -56,6 +59,42 @@ class CooklyApp {
         const shareBtn = document.getElementById('share-recipe');
         if (shareBtn) {
             shareBtn.addEventListener('click', () => this.shareRecipe());
+        }
+        
+        // Add to shopping list button (in recipe display)
+        const addToShoppingBtn = document.getElementById('add-to-shopping');
+        if (addToShoppingBtn) {
+            addToShoppingBtn.addEventListener('click', () => this.addCurrentRecipeToShoppingList());
+        }
+        
+        // Shopping list toggle
+        const toggleShoppingList = document.getElementById('toggle-shopping-list');
+        if (toggleShoppingList) {
+            toggleShoppingList.addEventListener('click', () => this.toggleShoppingList());
+        }
+        
+        // Add manual shopping item
+        const addItemBtn = document.getElementById('add-shopping-item');
+        const newItemInput = document.getElementById('new-shopping-item');
+        if (addItemBtn) {
+            addItemBtn.addEventListener('click', () => this.addManualShoppingItem());
+        }
+        if (newItemInput) {
+            newItemInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.addManualShoppingItem();
+            });
+        }
+        
+        // Clear purchased items
+        const clearPurchasedBtn = document.getElementById('clear-purchased');
+        if (clearPurchasedBtn) {
+            clearPurchasedBtn.addEventListener('click', () => this.clearPurchasedItems());
+        }
+        
+        // Clear all items
+        const clearAllBtn = document.getElementById('clear-all-items');
+        if (clearAllBtn) {
+            clearAllBtn.addEventListener('click', () => this.clearAllShoppingItems());
         }
         
         // Share dialog tabs
@@ -287,6 +326,7 @@ class CooklyApp {
                 </div>
                 <div class="recipe-card-actions">
                     <button onclick="app.loadSavedRecipe(${recipe.id})" class="view-recipe-btn">View</button>
+                    <button onclick="app.addRecipeToShoppingList(${recipe.id})" class="add-to-list-btn">🛒 Add to List</button>
                     <button onclick="app.shareRecipeById(${recipe.id})" class="share-saved-btn">Share</button>
                     <button onclick="app.deleteRecipe(${recipe.id})" class="delete-recipe-btn">Delete</button>
                 </div>
@@ -515,6 +555,223 @@ class CooklyApp {
 
     saveToStorage() {
         localStorage.setItem('savedRecipes', JSON.stringify(this.savedRecipes));
+    }
+
+    // ==================== SHOPPING LIST METHODS ====================
+
+    loadShoppingList() {
+        try {
+            const stored = localStorage.getItem('shoppingList');
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    saveShoppingList() {
+        localStorage.setItem('shoppingList', JSON.stringify(this.shoppingList));
+        this.displayShoppingList();
+    }
+
+    toggleShoppingList() {
+        this.shoppingListVisible = !this.shoppingListVisible;
+        const content = document.getElementById('shopping-list-content');
+        const toggleBtn = document.getElementById('toggle-shopping-list');
+        
+        if (content) {
+            content.style.display = this.shoppingListVisible ? 'block' : 'none';
+        }
+        if (toggleBtn) {
+            toggleBtn.textContent = this.shoppingListVisible ? 'Hide' : 'Show';
+        }
+        
+        if (this.shoppingListVisible) {
+            this.displayShoppingList();
+        }
+    }
+
+    displayShoppingList() {
+        const container = document.getElementById('shopping-list-items');
+        const emptyState = document.getElementById('shopping-list-empty');
+        
+        if (!container) return;
+        
+        if (this.shoppingList.length === 0) {
+            container.innerHTML = '';
+            if (emptyState) emptyState.style.display = 'block';
+            return;
+        }
+        
+        if (emptyState) emptyState.style.display = 'none';
+        
+        container.innerHTML = '';
+        this.shoppingList.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.className = `shopping-list-item ${item.purchased ? 'purchased' : ''}`;
+            li.innerHTML = `
+                <input type="checkbox" class="item-checkbox" 
+                    ${item.purchased ? 'checked' : ''} 
+                    onchange="app.toggleItemPurchased(${index})">
+                <span class="item-text">${this.escapeHtml(item.text)}</span>
+                ${item.recipe ? `<span class="item-recipe-tag">${this.escapeHtml(item.recipe)}</span>` : ''}
+                <button class="remove-item-btn" onclick="app.removeShoppingItem(${index})" title="Remove">×</button>
+            `;
+            container.appendChild(li);
+        });
+    }
+
+    addCurrentRecipeToShoppingList() {
+        if (!this.currentRecipe || !this.currentRecipe.ingredients) {
+            this.showStatus('No ingredients to add', 'error');
+            return;
+        }
+        
+        const recipeName = this.currentRecipe.title || 'Recipe';
+        let addedCount = 0;
+        
+        this.currentRecipe.ingredients.forEach(ingredient => {
+            // Check for duplicates (case-insensitive)
+            const isDuplicate = this.shoppingList.some(item => 
+                item.text.toLowerCase() === ingredient.toLowerCase()
+            );
+            
+            if (!isDuplicate) {
+                this.shoppingList.push({
+                    text: ingredient,
+                    purchased: false,
+                    recipe: recipeName,
+                    addedAt: new Date().toISOString()
+                });
+                addedCount++;
+            }
+        });
+        
+        this.saveShoppingList();
+        
+        if (addedCount > 0) {
+            this.showStatus(`Added ${addedCount} items to shopping list!`, 'success');
+            // Auto-show shopping list
+            if (!this.shoppingListVisible) {
+                this.toggleShoppingList();
+            }
+        } else {
+            this.showStatus('All ingredients already in list', 'info');
+        }
+    }
+
+    addRecipeToShoppingList(recipeId) {
+        const recipe = this.savedRecipes.find(r => r.id === recipeId);
+        if (!recipe || !recipe.ingredients) {
+            this.showStatus('Recipe not found', 'error');
+            return;
+        }
+        
+        const recipeName = recipe.title || 'Recipe';
+        let addedCount = 0;
+        
+        recipe.ingredients.forEach(ingredient => {
+            // Check for duplicates
+            const isDuplicate = this.shoppingList.some(item => 
+                item.text.toLowerCase() === ingredient.toLowerCase()
+            );
+            
+            if (!isDuplicate) {
+                this.shoppingList.push({
+                    text: ingredient,
+                    purchased: false,
+                    recipe: recipeName,
+                    addedAt: new Date().toISOString()
+                });
+                addedCount++;
+            }
+        });
+        
+        this.saveShoppingList();
+        
+        if (addedCount > 0) {
+            this.showStatus(`Added ${addedCount} items from "${recipeName}"`, 'success');
+            // Auto-show shopping list
+            if (!this.shoppingListVisible) {
+                this.toggleShoppingList();
+            }
+        } else {
+            this.showStatus('All ingredients already in list', 'info');
+        }
+    }
+
+    addManualShoppingItem() {
+        const input = document.getElementById('new-shopping-item');
+        const text = input.value.trim();
+        
+        if (!text) return;
+        
+        // Check for duplicates
+        const isDuplicate = this.shoppingList.some(item => 
+            item.text.toLowerCase() === text.toLowerCase()
+        );
+        
+        if (isDuplicate) {
+            this.showStatus('Item already in list', 'info');
+            input.value = '';
+            return;
+        }
+        
+        this.shoppingList.push({
+            text: text,
+            purchased: false,
+            recipe: null,
+            addedAt: new Date().toISOString()
+        });
+        
+        this.saveShoppingList();
+        input.value = '';
+        this.showStatus('Item added!', 'success');
+    }
+
+    toggleItemPurchased(index) {
+        if (this.shoppingList[index]) {
+            this.shoppingList[index].purchased = !this.shoppingList[index].purchased;
+            this.saveShoppingList();
+        }
+    }
+
+    removeShoppingItem(index) {
+        this.shoppingList.splice(index, 1);
+        this.saveShoppingList();
+        this.showStatus('Item removed', 'success');
+    }
+
+    clearPurchasedItems() {
+        const beforeCount = this.shoppingList.length;
+        this.shoppingList = this.shoppingList.filter(item => !item.purchased);
+        const removedCount = beforeCount - this.shoppingList.length;
+        
+        this.saveShoppingList();
+        
+        if (removedCount > 0) {
+            this.showStatus(`Cleared ${removedCount} purchased items`, 'success');
+        } else {
+            this.showStatus('No purchased items to clear', 'info');
+        }
+    }
+
+    clearAllShoppingItems() {
+        if (this.shoppingList.length === 0) {
+            this.showStatus('Shopping list is already empty', 'info');
+            return;
+        }
+        
+        if (confirm('Clear all items from your shopping list?')) {
+            this.shoppingList = [];
+            this.saveShoppingList();
+            this.showStatus('Shopping list cleared', 'success');
+        }
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 

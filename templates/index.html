@@ -76,6 +76,7 @@
                 <div class="recipe-actions">
                     <button id="save-recipe" class="save-button">💾 Save</button>
                     <button id="share-recipe" class="share-button">📤 Share</button>
+                    <button id="add-to-shopping" class="add-to-shopping-btn">🛒 Add to List</button>
                     <button id="step-by-step" class="step-button">👨‍🍳 Step-by-Step</button>
                 </div>
             </section>
@@ -153,6 +154,31 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Shopping List Section -->
+            <section id="shopping-list-section" class="shopping-list-section">
+                <div class="shopping-list-header">
+                    <h3 class="section-title">🛒 Shopping List</h3>
+                    <button id="toggle-shopping-list" class="toggle-btn">Show</button>
+                </div>
+                <div id="shopping-list-content" class="shopping-list-content" style="display: none;">
+                    <div id="shopping-list-empty" class="shopping-list-empty">
+                        <p>Your shopping list is empty.</p>
+                        <p class="hint">Add ingredients from saved recipes or add items manually.</p>
+                    </div>
+                    <ul id="shopping-list-items" class="shopping-list-items"></ul>
+                    <div class="shopping-list-actions">
+                        <div class="add-item-row">
+                            <input type="text" id="new-shopping-item" placeholder="Add item manually..." class="add-item-input">
+                            <button id="add-shopping-item" class="add-item-btn">+</button>
+                        </div>
+                        <div class="list-actions">
+                            <button id="clear-purchased" class="action-btn">Clear Purchased</button>
+                            <button id="clear-all-items" class="action-btn danger">Clear All</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <section class="saved-recipes">
                 <div class="saved-recipes-header">
